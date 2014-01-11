@@ -7,12 +7,12 @@ int main(void)
 	time(&sek);
 	srand((unsigned)sek);
 
-    cardPointer originalCardDeck[62];
-    for(c = 0; c < 62; c++) {
+    cardPointer originalCardDeck[52];
+    for(c = 0; c < 52; c++) {
         size_t cardSize = sizeof(struct cards);
         originalCardDeck[c] = malloc(cardSize);
     }
-	cardPointer cardDeck[62];
+	cardPointer cardDeck[52];
 	player allPlayers[9];
 	short gameEnd;
 	short playerCounter;
@@ -31,10 +31,10 @@ int main(void)
 
 	// Schleife für den Spieldurchlauf.
 	do {
-        for(c = 0; c < 62; c++)
+        for(c = 0; c < 52; c++)
             cardDeck[c] = originalCardDeck[c];
-        //for(c = 0; c < playerCounter; c++)
-        //    resetPlayerHand(&allPlayers[c]);
+        for(c = 0; c < playerCounter; c++)
+            resetPlayerHand(&allPlayers[c]);
 		gameContinues(cardDeck, playerCounter, allPlayers);
 	}
 	while(gameEnd == 0);
@@ -134,6 +134,7 @@ void gameContinues(cardPointer* cardDeck, short playerCounter, player* allPlayer
         short choice;
         short winningIndex;
         player* actualPlayer = &allPlayersPointer[playerIndex];
+        player* bank = &allPlayersPointer[0];
         // Nicht vorhandene Spieler werden nie betrachtet..
         if((*actualPlayer).playerNumber == -1)
             continue;
@@ -151,7 +152,7 @@ void gameContinues(cardPointer* cardDeck, short playerCounter, player* allPlayer
                 break;
             // Ausgabe der Karte der Bank.
             printf("Die Bank hat eine offene Karte:");
-            cardsToPrint((*actualPlayer).handCards[0]);
+            cardsToPrint((*bank).handCards[0]);
             printf("\n");
             // Ausgabe der Karten des jetzigen Spielers.
             printf("Spieler %hd: %s. Du hast folgende Karten", playerIndex, (*actualPlayer).name);
@@ -191,14 +192,14 @@ void gameContinues(cardPointer* cardDeck, short playerCounter, player* allPlayer
 
 // Funktion die das Kartenziehen regelt.
 cardPointer* drawCard(cardPointer* cardDeck) {
-	cardPointer actualCardDeck[62];
+	cardPointer actualCardDeck[52];
 	cardPointer* drawnCard;
 	short actualCardCounter = 0;
 	short c;
 	short randomCard;
 
 	// Es werden alle Karten aufgezählt die noch im Deck sind.
-	for(c = 0; c < 62; c++) {
+	for(c = 0; c < 52; c++) {
 		if(cardDeck[c] != NULL) {
 			actualCardDeck[actualCardCounter] = cardDeck[c];
 			actualCardCounter++;
@@ -211,8 +212,8 @@ cardPointer* drawCard(cardPointer* cardDeck) {
 	randomCard = rand() % actualCardCounter;
 	drawnCard = actualCardDeck[randomCard];
 	// Die zufäälig gezogene Karte wird aus dem richtigen Deck herausgenommen.
-	for(c = 0; c < 62; c++) {
-        if(cardDeck[c] == *drawnCard) {
+	for(c = 0; c < 52; c++) {
+        if(cardDeck[c] == drawnCard) {
             cardDeck[c] == NULL;
             break;
         }
@@ -227,6 +228,12 @@ void addCardToHand(player* actualPlayer, cardPointer actualCard) {
 			(*actualPlayer).handCards[playersCardCounter] = actualCard;
 			(*actualPlayer).actualScore += (*actualCard).value;
 			(*actualPlayer).cardCounter += 1;
+}
+
+// Zurücksetzen der spielerhänder
+void resetPlayerHand(player* actualPlayer) {
+			(*actualPlayer).actualScore = 0;
+			(*actualPlayer).cardCounter = 0;
 }
 
 short winning(player actualPlayer) {

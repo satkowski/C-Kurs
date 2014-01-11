@@ -51,6 +51,7 @@ void gameContinues(cardPointer* cardDeck, short playerCounter, player* allPlayer
 
 cardPointer* drawCard(cardPointer* cardDeck);
 void addCardToHand(player* actualPlayer, cardPointer actualCard);
+void resetPlayerHand(player* actualPlayer);
 
 short winning(player actualPlayer);
 

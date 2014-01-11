@@ -6,8 +6,8 @@ int main(void)
 	time(&sek);
 	srand((unsigned)sek);
 
-	card originalCardDeck[62];
-	card cardDeck[62];
+	card originalCardDeck[52];
+	card cardDeck[52];
 	player allPlayers[9];
 	short gameEnd;
 	short playerCounter;
@@ -27,10 +27,10 @@ int main(void)
 	// Schleife für den Spieldurchlauf.
 	do {
         short c;
-		void* voidCardDeck[62];
-        for(c = 0; c < 62; c++)
+		void* voidCardDeck[52];
+        for(c = 0; c < 52; c++)
             cardDeck[c] = originalCardDeck[c];
-		for(c = 0; c < 62; c++)
+		for(c = 0; c < 52; c++)
             voidCardDeck[c] = &cardDeck[c];
         for(c = 0; c < playerCounter; c++)
             resetPlayerHand(&allPlayers[c]);
@@ -206,14 +206,14 @@ void resetPlayerHand(player* actualPlayer) {
 
 // Funktion die das Kartenziehen regelt.
 void* drawCard(void** cardDeck) {
-	void* actualCardDeck[62];
+	void* actualCardDeck[52];
 	void* drawenCard;
 	short actualCardCounter = 0;
 	short c;
 	short randomCard;
 
 	// Es werden alle Karten aufgezählt die noch im Deck sind.
-	for(c = 0; c < 62; c++) {
+	for(c = 0; c < 52; c++) {
 		if(cardDeck[c] != NULL) {
 			actualCardDeck[actualCardCounter] = cardDeck[c];
 			actualCardCounter++;
