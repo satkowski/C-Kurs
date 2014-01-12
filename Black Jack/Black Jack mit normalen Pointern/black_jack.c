@@ -3,13 +3,17 @@
 int main(void)
 {
     short c;
+    // Hier wird die Größe des Card Structs ausgelesen und gespeichert.
+    size_t cardSize = sizeof(struct cards);
 	long sek;
 	time(&sek);
 	srand((unsigned)sek);
 
     cardPointer originalCardDeck[52];
     for(c = 0; c < 52; c++) {
-        size_t cardSize = sizeof(struct cards);
+        // Hier wird durch malloc (Memory Allocate) ein Speicher reserviert, der die Größe einen Cards struct hat.
+        // Dies muss gemacht werden, da es sonst Speicherzugriffsfehler geben würde, jedenfalls mit der meinigen Implementierung.
+        // Nähere Informationen in der nächsten Stunde.
         originalCardDeck[c] = malloc(cardSize);
     }
 	cardPointer cardDeck[52];
@@ -31,6 +35,8 @@ int main(void)
 
 	// Schleife für den Spieldurchlauf.
 	do {
+        // Hier wird das original cardDeck in ein in diesem Spieldurchlauf zu benutzenden Array umgeschrieben.
+        // Damit hab ich immer ein komplettes unverändertes Deck gespeichert.
         for(c = 0; c < 52; c++)
             cardDeck[c] = originalCardDeck[c];
         for(c = 0; c < playerCounter; c++)
@@ -73,6 +79,9 @@ short initAllPlayer(player* allPlayerPointer) {
 	// Eingabe der Spieleranzahl.
 	printf("Wieviele Spieler seit ihr? Die maximale Anzahl beträgt 8 Spieler! :\n");
 	scanf("%hd", &playerNumber);
+	// Liest EIN Zeichen aus dem stdin aus. Dies wird gemacht, da sonst ein '\n' im stdin stehen
+	// würde und somit das erste fgets dies sofort einliest und keinen Namen für den ersten
+	// Spieler zulässt.
 	getchar();
 
 	// Initialisierung der verschiedenen Spieler.
@@ -81,7 +90,8 @@ short initAllPlayer(player* allPlayerPointer) {
 		char name[32];
 		// Eingabe des Namen eines Spielers.
 		printf("Spieler %hd gib deinen Namen ein! :\n", playerCounter);
-		// fgets nimmt nur genau 32 - 1 Zeichen auf und speichert es ab. Es werden überliegenden
+		// fgets nimmt nur genau 32 - 1 Zeichen auf und speichert es in name ab. Diese Zeichen liest
+		// er aus dem Stream stdin aus. Es werden überliegenden
 		// Wortteile abgeschnitten und auch das '\n’ mit gespeichert.
 		fgets(name, 32, stdin);
 		// '\n' mit '\0' überschreiben
@@ -129,6 +139,7 @@ void gameContinues(cardPointer* cardDeck, short playerCounter, player* allPlayer
 		}
 	}
 
+    // Alle Spieler, die mit spielen werden nach und nach abgefragt, was sie machen wollen.
 	for(playerIndex = 1; playerIndex <= playerCounter; playerIndex++) {
         short turnEnd;
         short choice;
@@ -171,8 +182,8 @@ void gameContinues(cardPointer* cardDeck, short playerCounter, player* allPlayer
             // Abfrage der verschiedenen Auswahlmöglichkeiten
             if(choice == 1) {
                 cardPointer drawnCard = drawCard(cardDeck);
-                addCardToHand(&allPlayersPointer[playerIndex], drawnCard);
-                printf("Du hast eine");
+                addCardToHand(actualPlayer, drawnCard);
+                printf("Du hast eine Karte:");
                 cardsToPrint((*actualPlayer).handCards[(*actualPlayer).cardCounter - 1]);
                 printf(" gezogen!\n\n");
                 turnEnd = 0;
@@ -186,6 +197,13 @@ void gameContinues(cardPointer* cardDeck, short playerCounter, player* allPlayer
         // Falls ein Spieler gewonnen hat, bekommt er alles.
         if(winningIndex == 1) {
 
+        }
+        else {
+            cardPointer drawnCard = drawCard(cardDeck);
+            addCardToHand(bank, drawnCard);
+            printf("Die Bank hat eine Karte:")
+            cardsToPrint((*bank).handCards[(*bank).cardCounter - 1]);
+            printf(" gezogen!\n\n");
         }
 	}
 }
@@ -236,30 +254,17 @@ void resetPlayerHand(player* actualPlayer) {
 			(*actualPlayer).cardCounter = 0;
 }
 
+// Funktion die schaut, wer gewonnen hat.
 short winning(player actualPlayer) {
         // Abfrage nach dem Gewinn.
-        if(actualPlayer.actualScore == 22) {
-            cardPointer actualCard[5];
-            *actualCard = actualPlayer.handCards;
-            // Wenn man 2 Ässer hat, hat man gewonnen.
-            if((*actualCard[0]).name == ASS && (*actualCard[1]).name == ASS) {
-                printf("%s, du hast gewonnen, da du 2 Ässer auf der Hand hast!\n", actualPlayer.name);
-                return 1;
-            }
-            // Falls nicht, hat man bei 22 Punkten verloren.
-            else {
-                printf("%s, du hast verloren, da du 22 Punkte, aber keine 2 Ässer auf der Hand hast!\n", actualPlayer.name);
-                return -1;
-            }
-        }
         // Bei genau 21 hat man gewonnen.
-        else if(actualPlayer.actualScore == 21) {
-            printf("%s, du hast gewonnen, da du 21 Punkte erreichst hast!\n", actualPlayer.name);
+        if(actualPlayer.actualScore == 21) {
+            printf("%s, du hast gewonnen, da du 21 Punkte erreichst hast!\n\n", actualPlayer.name);
             return 1;
         }
         // Bei mehr als 21 Punkten hat man verloren.
         else if(actualPlayer.actualScore > 21) {
-            printf("%s, du hast verloren, da du %hd Punkte erreichst hast!\n", actualPlayer.name, actualPlayer.actualScore);
+            printf("%s, du hast verloren, da du %hd Punkte erreichst hast!\n\n", actualPlayer.name, actualPlayer.actualScore);
             return -1;
         }
         // Man ist noch unter den 21 Punkten.
